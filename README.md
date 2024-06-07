@@ -18,7 +18,7 @@ This project implements a Flask-based API service capable of searching for techn
 
 1. **Clone the Repository**
     ```sh
-    git clone <repository-url>
+    git clone https://github.com/ghiemer/cheatsheet_agent_langchain.git
     cd langchain_agent
     ```
 
@@ -159,6 +159,5 @@ This project is licensed under the MIT License. For more details, see the LICENS
 
 ## Authors
 
-- [Your Name](https://github.com/yourusername)
-- Additional Contributors
+- [Gabriel Hiemer](https://github.com/ghiemer)
 
