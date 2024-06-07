@@ -2,3 +2,4 @@
 venv/
 __pychache__/
 cheatsheets/
+.DS_Store

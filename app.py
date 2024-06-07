@@ -8,11 +8,25 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, SystemMes
 import logging
 import os
 from datetime import datetime
+import requests
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
+
+def web_search(query):
+    search_url = f"https://www.google.com/search?q={query}"
+    response = requests.get(search_url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    results = []
+    for g in soup.find_all('div', class_='g'):
+        links = g.find_all('a')
+        if links:
+            link = links[0]['href']
+            results.append(link)
+    return results[:5]
 
 @app.route('/query', methods=['POST'])
 def query_agent():
@@ -27,9 +41,13 @@ def query_agent():
         results = []
 
         memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-        model = ChatOpenAI(model="gpt-4")
+        model = ChatOpenAI(model="gpt-4o")
         search = TavilySearchResults(max_results=2)
         tools = [search]
+
+        # Web search for additional information
+        web_results = web_search(question)
+        additional_info = " ".join([f"Source: {url}" for url in web_results])
 
         # Define the prompt template with language support
         prompt = ChatPromptTemplate(
@@ -49,7 +67,7 @@ def query_agent():
         )
 
         response = agent_executor.predict(question=question)
-        results.append(response)
+        results.append(response + "\n\n" + additional_info)
 
         cheatsheet = summarize_results(results)
         file_name = save_as_markdown(cheatsheet, config.get('output_folder', './cheatsheets/'), language)
